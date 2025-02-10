@@ -1,0 +1,32 @@
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore vendor dependencies (use 'composer install' to restore)
+vendor/
+
+# Ignore environment and configuration files
+test_config.ini
+.env
+
+# Ignore logs and cache
+logs/
+*.log
+cache/
+
+# Ignore IDE/editor-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore PHPUnit test results
+phpunit.xml
+phpunit.xml.dist
+/build/
+/tests/_output/
+/test/
+
+# Ignore coverage reports
+coverage/
+*.cov

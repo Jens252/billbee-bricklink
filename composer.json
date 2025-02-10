@@ -1,0 +1,14 @@
+{
+    "require": {
+        "billbee/custom-shop-api": "^3.0",
+        "guzzlehttp/guzzle": "^7.9",
+        "guzzlehttp/oauth-subscriber": "^0.8.1",
+        "monolog/monolog": "^3.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "BillbeeBricklink\\": "src/"
+        },
+        "files": []
+    }
+}
