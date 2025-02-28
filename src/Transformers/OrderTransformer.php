@@ -30,7 +30,7 @@ class OrderTransformer
         $order->nickName = $response['buyer_name'];
 
         // Map the shipping cost
-        $order->shipCost = $response['cost']['shipping'];
+        $order->shipCost = round((float) $response['cost']['grand_total'] - (float) $response['cost']['subtotal'], 2);
 
         // Transform and map the buyer's address using AddressTransform
         $order->invoiceAddress = AddressTransform::toAddress($response);
