@@ -20,8 +20,8 @@ class OrderProductTransformer
         $orderProduct = new OrderProduct();
 
         // Calculate discount percentage if the final unit price differs from the original unit price
-        if ($response['unit_price_final'] != $response['unit_price']) {
-            $orderProduct->discountPercent = 1 - $response['unit_price_final'] / $response['unit_price'];
+        if ($response['unit_price_final'] < $response['unit_price']) {
+            $orderProduct->discountPercent = 100 * (1 - $response['unit_price_final'] / $response['unit_price']);
         }
 
         // Map the product quantity to the OrderProduct object

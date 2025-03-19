@@ -48,7 +48,7 @@ class StockSyncRepository implements StockSyncRepositoryInterface
             // Handle scenarios where stock needs to be moved to or out of the stockroom
             if ($quantity == 0) {
                 $parameters['is_stock_room'] = true;
-                $parameters['stock_room_id'] = $this->multiStockroom ? 'S' : 'C';
+                $parameters['stock_room_id'] = $this->multiStockroom ? 'C' : 'S';
             } elseif ($quantity > 0 & $product['quantity'] == 0) {
                 $parameters['is_stock_room'] = false;
             }
