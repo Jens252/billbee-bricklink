@@ -4,6 +4,7 @@ namespace BillbeeBricklink\Transformers;
 
 // Import necessary classes
 use Billbee\CustomShopApi\Model\Order; // Order model used in the CustomShop API
+use Billbee\CustomShopApi\Model\OrderProduct;
 use BillbeeBricklink\Helpers\{Time, PaymentMethod, OrderStatus}; // Helpers for time conversion, payment methods, and order statuses
 
 class OrderTransformer
@@ -30,7 +31,17 @@ class OrderTransformer
         $order->nickName = $response['buyer_name'];
 
         // Map the shipping cost
-        $order->shipCost = round((float) $response['cost']['grand_total'] - (float) $response['cost']['subtotal'], 2);
+        $order->shipCost = round((float) $response['cost']['grand_total'] - (float) $response['cost']['subtotal']
+            - (float) $response['cost']['salesTax'], 2);
+
+        // Add sales Tax as extra item if charged for order
+        if ((float) $response['cost']['salesTax'] > 0) {
+            $salesTaxEntry = new OrderProduct();
+            $salesTaxEntry->name = 'State Sales Tax';
+            $salesTaxEntry->quantity = 1;
+            $salesTaxEntry->unitPrice = round((float) $response['cost']['salesTax'], 2);
+            $order->items[] = $salesTaxEntry;
+        };
 
         // Transform and map the buyer's address using AddressTransform
         $order->invoiceAddress = AddressTransform::toAddress($response);
