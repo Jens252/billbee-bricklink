@@ -49,7 +49,16 @@ class ProductTransform
             $product->setHeightInCm($bl_catalog_item['dim_z']);
 
             // Set the product image using the image URL from the catalog item data
-            $product->setImages([ProductImageTransform::toProductImage($bl_catalog_item['image_url'])]);
+            if ((float) $bl_inventory_item['color_id'] > 0) {
+                $image_url = $bl_catalog_item['thumbnail_url'];
+                $color_id = $bl_inventory_item['color_id'];
+
+                // Replace the color (1-999) in the URL
+                $image_url = preg_replace('/\/([1-9][0-9]{0,2})\//', "/$color_id/", $image_url, 1);
+            } else {
+                $image_url = $bl_catalog_item['image_url'];
+            }
+            $product->setImages([ProductImageTransform::toProductImage($image_url)]);
         }
 
         // Set the manufacturer name (hardcoded as LEGO in this case)
