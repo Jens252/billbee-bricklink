@@ -72,7 +72,7 @@ class OrderTransformer
         $order->statusId = OrderStatus::fromBl($response['status']);
 
         // Map the seller's remarks or set to null if not provided
-        $order->sellerComment = $response['remarks'] ?? null;
+        $order->sellerComment = str_replace('Billbee ', '', $response['remarks'] ?? null);
 
         // Map the shipping profile ID
         $order->shippingProfileId = $response['shipping']['method_id'];
