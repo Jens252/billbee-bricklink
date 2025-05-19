@@ -37,7 +37,7 @@ class StockSyncRepository implements StockSyncRepositoryInterface
             // Do not sync parts (this would ignore partout on BrickLink)
             if ($product['item']['type'] != 'PART') {
                 // Check that quantity is not negative
-                $quantity = max(0, $quantity);
+                $quantity = max(0, (int) $quantity);
 
                 // If a max quantity is set for sets, ensure the quantity doesn't exceed the limit
                 if (isset($this->maxQuantityForSets) and $product['item']['type'] == 'SET') {
