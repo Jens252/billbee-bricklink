@@ -10,7 +10,7 @@ use BillbeeBricklink\Transformers\OrderProductTransformer;
 use BillbeeBricklink\Transformers\OrderTransformer;
 use BillbeeBricklink\BricklinkApi\Bricklink;
 use Billbee\CustomShopApi\Exception\OrderNotFoundException;
-use Billbee\CustomShopApi\Model\{PagedData, Order};
+use Billbee\CustomShopApi\Model\{PagedData, Order, OrderProduct};
 use Billbee\CustomShopApi\Repository\OrdersRepositoryInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
@@ -26,11 +26,12 @@ class OrderRepository implements OrdersRepositoryInterface
     private LoggerInterface $logger;
 
     // Constructor to initialize API gateway, client, and logger
-    public function __construct(Bricklink $gateway, LoggerInterface $logger)
+    public function __construct(Bricklink $gateway, LoggerInterface $logger, bool $group_parts=false)
     {
         $this->gateway = $gateway;
         $this->client = $this->gateway->client;
         $this->logger = $logger;
+        $this->group_parts = $group_parts;
     }
 
     /** @inheritDoc */
@@ -151,12 +152,30 @@ class OrderRepository implements OrdersRepositoryInterface
         try {
             // Fetch order items from the Bricklink API
             $bl_order_items = ResponseHelper::getData($this->client->get("orders/$order->orderId/items"));
-
+            
+            $combined_parts_value = 0;
+            $combined_parts_quantity = 0;
+            
             // Transform and populate items into the Order object
             foreach ($bl_order_items as $batch_items) {
                 foreach ($batch_items as $order_item) {
-                    $order->items[] = OrderProductTransformer::toOrderProduct($order_item);
+                    if ($order_item['item']['type'] != 'PART' or !$this->group_parts) {
+                        $order->items[] = OrderProductTransformer::toOrderProduct($order_item);
+                    } else {
+                        // Get total price and quantity of parts not listed individually
+                        $price_with_discounts = min($order_item['unit_price'], $order_item['unit_price_final']);
+                        $combined_parts_value += $price_with_discounts * $order_item['quantity'];
+                        $combined_parts_quantity += $order_item['quantity'];
+                    }
                 }
+            }
+            if ($combined_parts_quantity > 0) {
+                // Create combined entry for parts not listed individually
+                $combinedParts = new OrderProduct();
+                $combinedParts->name = "LEGO Parts ($combined_parts_quantity pieces)";
+                $combinedParts->quantity = 1;
+                $combinedParts->unitPrice = round($combined_parts_value, 2);
+                $order->items[] = $combinedParts;
             }
         } catch (GuzzleException|Exception $e) {
             // Log errors and throw an exception
